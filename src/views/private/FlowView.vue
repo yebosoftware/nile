@@ -10,13 +10,25 @@ import { v4 as uuidv4 } from 'uuid';
 
 const flowId = router.currentRoute.value.params.id;
 console.info(flowId)
-const flow = ref(null);
-const uploads = ref([]);
-const nodes = ref([])
+const flow = ref<Flow | null>(null);
+interface Node {
+  id: string;
+  name: string;
+  // Add other properties as needed
+}
+
+interface Flow {
+  id: string;
+  name: string;
+  description: string;
+  // Add other properties as needed
+}
+
+const nodes = ref<Node[]>([])
 
 onMounted(async () => {
   // Download flow details
-  let { data, error } = await supabase
+  const { data } = await supabase
     .from('flows')
     .select('*')
     .eq('id', flowId)
@@ -26,7 +38,7 @@ onMounted(async () => {
   console.info(data);
 
   // Download nodes
-  let { data: nodesData, error: nodesError } = await supabase
+  const { data: nodesData, error: nodesError } = await supabase
     .from('nodes')
     .select('*')
     .eq('flow_id', flowId)
@@ -41,10 +53,14 @@ onMounted(async () => {
   // uploads.value = uploadsData || [];
 });
 
-const uploadFile = async (nodeId) => {
+const uploadFile = async (nodeId: string) => {
   const newUUID = uuidv4(); // Generate a unique ID
   const fileInput = document.getElementById(nodeId);
-  const file = fileInput.files[0];
+  if (!fileInput) {
+    console.error('File input element not found');
+    return;
+  }
+  const file = (fileInput as HTMLInputElement).files?.[0];
 
   if (!file) {
     console.error('No file selected');
@@ -73,12 +89,12 @@ const uploadFile = async (nodeId) => {
     console.error('Error uploading file:', error);
   }
 };
-const downloadFile = async (id) => {
-  const { data, error } = await supabase
-      .storage
-      .from(bucketName)
-      .download(filePath);
-}
+// const downloadFile = async (id) => {
+//   const { data, error } = await supabase
+//       .storage
+//       .from(bucketName)
+//       .download(filePath);
+// }
 </script>
 
 <template>

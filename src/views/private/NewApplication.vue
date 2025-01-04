@@ -10,7 +10,7 @@ const createFlowAndNodes = async () => {
   console.log('Name submitted:', name.value);
   // Create a new flow using the flow template id;
   
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('flows')
     .insert([
       {
@@ -22,6 +22,11 @@ const createFlowAndNodes = async () => {
     .select()
 
   
+  if (!data || data.length === 0) {
+    console.error('No data returned from flow creation');
+    return;
+  }
+
   const nodesToBeCopied = nodeTemplates.value.map(template => ({
     name: template.name,
     flow_id: data[0].id,
@@ -30,7 +35,7 @@ const createFlowAndNodes = async () => {
 
   
   // const createdFlow = data[0];
-  const { data: createdNodes, error: createNodesError  } = await supabase
+  const { error: createNodesError  } = await supabase
     .from('nodes')
     .insert(nodesToBeCopied)
     .select()
@@ -42,9 +47,14 @@ const createFlowAndNodes = async () => {
 
 // Fetch all node_templates by flow_template_id
 const flowTemplateId = router.currentRoute.value.query.flow_template_id;
-const nodeTemplates = ref([]);
+interface NodeTemplate {
+  name: string;
+  node_type_id: number;
+}
+
+const nodeTemplates = ref<NodeTemplate[]>([]);
 const fetchNodeTemplates = async () => { 
-  const { data: flowTemplateNodesData, error: flowTemplateNodes } = await supabase
+  const { data: flowTemplateNodesData } = await supabase
     .from('node_templates')
     .select('*')
     .eq('flow_template_id', flowTemplateId)

@@ -3,24 +3,38 @@
 import { onMounted, ref } from 'vue';
 import { supabase } from '../../lib/supabase'
 
-const flowTemplates = ref([])
-const flows = ref([]);
-const user = ref(null);
+interface FlowTemplate {
+  is_disabled: boolean;
+  id: number;
+  title: string;
+  route: string;
+  query: { type: string; flow_template_id: number };
+}
+
+interface Flow {
+  id: number;
+  name: string;
+  flow_templates: { name: string };
+}
+
+const flowTemplates = ref<FlowTemplate[]>([]);
+const flows = ref<Flow[]>([]);
+const user = ref<{ full_name: string } | null>(null);
 
 onMounted(async () => {
-  let { data, error } = await supabase
+  const { data } = await supabase
     .from('flows')
     .select('*, flow_templates(*)');
   
   flows.value = data || [];
   console.info(flows.value);
 
-  let { data: flowTemplatesData, error: errorTemplates } = await supabase
+  const { data: flowTemplatesData } = await supabase
     .from('flow_templates')
     .select('*')
     .order('is_disabled', { ascending: true });
 
-  flowTemplates.value = flowTemplatesData.map(template => ({
+  flowTemplates.value = flowTemplatesData?.map(template => ({
     is_disabled: template.is_disabled,
     id: template.id,
     title: template.name,
@@ -48,17 +62,17 @@ const getFullName = async () => {
     const { data, error } = await supabase
       .from('profiles')
       .select('full_name')
-      .eq('id', fetchedUser.id) // Match the user ID
+      .eq('id', fetchedUser?.id) // Match the user ID
       .single(); // Retrieve only one record
 
     if (error) {
       throw error;
     }
 
-    console.log('User full name:', data);
+    console.log('User full name:', data); 
     user.value = data;
-  } catch (error) {
-    console.error('Error fetching full name:', error.message);
+  } catch (err) {
+    console.error('Error fetching full name:', err);
     return null;
   }
 };
