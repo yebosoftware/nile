@@ -20,6 +20,7 @@ const user = ref<UserProfile | null>(null)
 interface Node {
   id: string;
   name: string;
+  signedUrl?: string;
   // Add other properties as needed
 }
 
