@@ -84,7 +84,7 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const { data } = await supabase.auth.getSession();
-
+  
   // If the route requires authentication and the user is not logged in,
   if (to.meta.requiresAuth && !data.session) {
     next('/login');
