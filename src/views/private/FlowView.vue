@@ -11,6 +11,12 @@ import { v4 as uuidv4 } from 'uuid';
 const flowId = router.currentRoute.value.params.id;
 console.info(flowId)
 const flow = ref<Flow | null>(null);
+interface UserProfile {
+  organization_id: string;
+  // Add other properties as needed
+}
+
+const user = ref<UserProfile | null>(null)
 interface Node {
   id: string;
   name: string;
@@ -26,7 +32,37 @@ interface Flow {
 
 const nodes = ref<Node[]>([])
 
+const getSignedUrl = async (filename: string) => {
+  const { data } = await supabase.storage
+  .from('uploads')
+  .createSignedUrl(filename, 3600)
+
+  return data?.signedUrl;
+}
+
 onMounted(async () => {
+  const {
+    data: { user: fetchedUser },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError) {
+    throw authError;
+  }
+
+  // Fetch the user's profile from the database
+  const { data: profileData, error } = await supabase
+    .from('profiles')
+    .select('organization_id')
+    .eq('id', fetchedUser?.id) // Match the user ID
+    .single(); // Retrieve only one record
+
+  if (error) {
+    throw error;
+  }
+
+  user.value = profileData;
+
   // Download flow details
   const { data } = await supabase
     .from('flows')
@@ -38,12 +74,22 @@ onMounted(async () => {
   console.info(data);
 
   // Download nodes
-  const { data: nodesData, error: nodesError } = await supabase
+  const { data: nodesData } = await supabase
     .from('nodes')
-    .select('*')
+    .select('*, uploads!latest_upload_id(*)')
     .eq('flow_id', flowId)
-  nodes.value = nodesData || [];
-  console.info(nodesData, nodesError)
+  nodes.value = await Promise.all(
+    nodesData?.map(async (node) => {
+      let signedUrl;
+      if (node.latest_upload_id) { 
+        console.info(node.uploads.filename)
+        signedUrl = await getSignedUrl(node.uploads.filename);
+      }
+        
+      
+      return { ...node, signedUrl };
+    }) || []
+  );
   // Download documents
   // let { data: uploadsData, error: uploadsError } = await supabase
   //   .from('uploads')
@@ -53,6 +99,9 @@ onMounted(async () => {
   // uploads.value = uploadsData || [];
 });
 
+// 1. Upload file
+// 2. Once we have the upload response, insert row into uploads table 
+// 4. Get the resulting id and update the node with the new upload id
 const uploadFile = async (nodeId: string) => {
   const newUUID = uuidv4(); // Generate a unique ID
   const fileInput = document.getElementById(nodeId);
@@ -73,10 +122,10 @@ const uploadFile = async (nodeId: string) => {
   const fileNameWithExtension = `${newUUID}.${fileExtension}`; // Create the f
   try {
     // Upload the file to the Supabase storage bucket
-    const { data, error } = await supabase
+    const { data: uploadedFile, error } = await supabase
       .storage
       .from('uploads') // Replace with your bucket name
-      .upload(fileNameWithExtension, file, {
+      .upload(`${user.value?.organization_id}/${fileNameWithExtension}`, file, {
         contentType: mimeType, // Set the MIME type explicitly
       }); // Replace `folder-name/` with the desired folder
 
@@ -84,7 +133,29 @@ const uploadFile = async (nodeId: string) => {
       throw error;
     }
 
-    console.log('File uploaded successfully:', data);
+    // Insert a new upload line
+    const { data: insertUploads } = await supabase
+    .from('uploads')
+    .insert([
+      {
+        filename: uploadedFile.path,
+        node_id: Number(nodeId)
+      },
+    ])
+      .select()
+
+    if (!insertUploads) {
+      throw new Error('Failed to insert upload');
+    }
+
+    const createdUpload = insertUploads[0];
+    const { data: updatedNode } = await supabase
+      .from('nodes')
+      .update({ latest_upload_id: createdUpload.id })
+      .eq('id', nodeId)
+      .select()
+              
+    console.info(updatedNode)
   } catch (error) {
     console.error('Error uploading file:', error);
   }
@@ -103,7 +174,7 @@ const uploadFile = async (nodeId: string) => {
   <div>Documents</div>
   <ul>
     <li v-for="node in nodes" :key="node.id">
-      <a target="_blank">
+      <a target="_blank" :href="node.signedUrl">
         {{ node.name }}
       </a>
       <!-- <button @click="downloadFile(upload.id)">Download</button> -->
