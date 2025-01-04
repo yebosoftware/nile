@@ -27,6 +27,7 @@ interface Node {
   id: string;
   name: string;
   signedUrl?: string;
+  latest_upload_id?: number;
   // Add other properties as needed
 }
 
