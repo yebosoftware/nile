@@ -9,14 +9,32 @@ const name = ref('');
 const createFlowAndNodes = async () => {
   console.log('Name submitted:', name.value);
   // Create a new flow using the flow template id;
-  
+  const {
+      data: { user: fetchedUser },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError) {
+      throw authError;
+    }
+
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('organization_id')
+      .eq('id', fetchedUser?.id) // Match the user ID
+      .single(); // Retrieve only one record
+
+    if (error) {
+      throw error;
+    }
+
   const { data } = await supabase
     .from('flows')
     .insert([
       {
         name: name.value,
         flow_template_id: router.currentRoute.value.query.flow_template_id,
-        organization_id: 1
+        organization_id: profile.organization_id
       },
     ])
     .select()

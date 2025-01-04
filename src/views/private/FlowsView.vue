@@ -22,12 +22,13 @@ const flows = ref<Flow[]>([]);
 const user = ref<{ full_name: string } | null>(null);
 
 onMounted(async () => {
+    console.info('here');
+
   const { data } = await supabase
     .from('flows')
-    .select('*, flow_templates(*)');
+    .select('*, flow_templates(*)')
   
   flows.value = data || [];
-  console.info(flows.value);
 
   const { data: flowTemplatesData } = await supabase
     .from('flow_templates')
@@ -98,7 +99,7 @@ const getFullName = async () => {
     <h3>Your applications</h3>
     <ul>
       <li v-for="flow in flows" :key="flow.id">
-        <router-link :to="{ name: 'flow', params: { id: 1 } }">{{ flow.name }} - {{ flow.flow_templates.name }}</router-link>
+        <router-link :to="{ name: 'flow', params: { id: flow.id } }">{{ flow.name }} - {{ flow.flow_templates.name }}</router-link>
       </li>
     </ul>
   </div>
