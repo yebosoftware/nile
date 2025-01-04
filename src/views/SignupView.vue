@@ -16,7 +16,7 @@ async function signUpNewUser() {
     email: email.value,
     password: password.value,
     options: {
-      emailRedirectTo: 'https://example.com/welcome',
+      emailRedirectTo: 'https://jump-nile.netlify.app/dashboard/flows',
       data: {
         full_name: fullName.value, // Save full name in user_metadata
         organization_name: organization.value, // Save organization in user_metadata
@@ -26,7 +26,7 @@ async function signUpNewUser() {
 
   
   if (error) return
-  
+
   console.info(data, error )
   router.push({ name: 'confirmation' })
 }
