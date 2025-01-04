@@ -95,7 +95,7 @@ async function signUpNewUser() {
       <button type="submit" :disabled="isLoading">
         {{ isLoading ? 'Logging in...' : 'Login' }}
       </button>
-      <router-link to="/signup">Signup</router-link>
+      <router-link to="/login">Login</router-link>
     </form>
   </div>
 </template>
