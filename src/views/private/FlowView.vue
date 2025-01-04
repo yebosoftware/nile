@@ -4,15 +4,21 @@ import { onMounted, ref } from 'vue';
 import { supabase } from '../../lib/supabase'
 import router from '@/router';
 import { v4 as uuidv4 } from 'uuid';
+import ProgressBar from '@/components/ProgressBar.vue';
 
 // const items = ref([{label: 'test'}])
 // Lifecycle hook
 
+const progress = ref(0);
 const flowId = router.currentRoute.value.params.id;
-console.info(flowId)
+
 const flow = ref<Flow | null>(null);
 interface UserProfile {
   organization_id: string;
+  uploads?: {
+    filename: string;
+  };
+  latest_upload_id?: number;
   // Add other properties as needed
 }
 
@@ -41,8 +47,8 @@ const getSignedUrl = async (filename: string) => {
   return data?.signedUrl;
 }
 
-onMounted(async () => {
-  const {
+const fetchNodes = async () => { 
+   const {
     data: { user: fetchedUser },
     error: authError,
   } = await supabase.auth.getUser();
@@ -80,18 +86,20 @@ onMounted(async () => {
     .select('*, uploads!latest_upload_id(*)')
     .eq('flow_id', flowId)
     .order('name', {ascending: true})
-  nodes.value = await Promise.all(
-    nodesData?.map(async (node) => {
-      let signedUrl;
-      if (node.latest_upload_id) { 
-        console.info(node.uploads.filename)
-        signedUrl = await getSignedUrl(node.uploads.filename);
-      }
+    nodes.value = await Promise.all(
+      nodesData?.map(async (node) => {
+        let signedUrl;
+        if (node.latest_upload_id) { 
+          console.info(node.uploads.filename)
+          signedUrl = await getSignedUrl(node.uploads.filename);
+        }  
         
-      
-      return { ...node, signedUrl };
-    }) || []
-  );
+        return { ...node, signedUrl };
+      }) || []
+    );
+
+  const nodesWithUploads = nodes.value.filter(node => node.latest_upload_id);
+  progress.value = nodesWithUploads.length / nodes.value.length * 100;
   // Download documents
   // let { data: uploadsData, error: uploadsError } = await supabase
   //   .from('uploads')
@@ -99,6 +107,10 @@ onMounted(async () => {
   //   .eq('nodes.flows.id', flowId)
 
   // uploads.value = uploadsData || [];
+}
+
+onMounted(async () => {
+ fetchNodes()
 });
 
 // 1. Upload file
@@ -158,6 +170,7 @@ const uploadFile = async (nodeId: string) => {
       .select()
               
     console.info(updatedNode)
+    fetchNodes()
   } catch (error) {
     console.error('Error uploading file:', error);
   }
@@ -171,31 +184,92 @@ const uploadFile = async (nodeId: string) => {
 </script>
 
 <template>
-  <h3 v-if="flow">{{flow.name}}</h3>
-  <h6 v-if="flow">{{flow.description}}</h6>
-  <div>Documents</div>
-  <ul>
-    <li v-for="node in nodes" :key="node.id">
-      <a target="_blank" :href="node.signedUrl">
-        {{ node.name }}
-      </a>
-      <!-- <button @click="downloadFile(upload.id)">Download</button> -->
-      <button @click="uploadFile(node.id)">Upload new</button>
-      <input type="file" :id="node.id" />
-    </li>
-  </ul>
-  <!-- <ul>
-    <li v-for="upload in uploads" :key="upload.id">
-      <button @click="downloadFile(upload.id)">Download</button>
-      <button @click="uploadFile">Upload new</button>
-      <input type="file" id="fileInput" />
-      <a target="_blank" href="https://qldtvnlmytnpjouadman.supabase.co/storage/v1/object/public/uploads/photo_2025-01-03%2010.21.39.jpeg">
-        {{ upload.nodes[0].name }}
-      </a>
-    </li>
-  </ul> -->
+  <h3 v-if="flow">{{ flow.name }}</h3>
+  <ProgressBar :value="progress" color="#2196f3" />
+
+  <br/>
+  <div class="card-container">
+    <div class="card" v-for="node in nodes" :key="node.id">
+      <div class="card-header">
+        <h4>{{ node.name }}</h4>
+      </div>
+      <div class="card-body">
+        <a v-if="node.signedUrl" target="_blank" :href="node.signedUrl" class="card-link">
+          Open Document
+        </a>
+        <div class="file-input">
+          <input type="file" :id="node.id" />
+          <button @click="uploadFile(node.id)">Upload</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
-<style scoped>
 
+
+<style scoped>
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.card {
+  width: 300px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.card-header {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card-link {
+  color: #2196f3;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.card-link:hover {
+  text-decoration: underline;
+}
+
+.file-input {
+  display: flex;
+  flex-direction: column; /* Stacks the file input and button vertically */
+  gap: 8px; /* Adds spacing between them */
+}
+
+input[type="file"] {
+  font-size: 0.9rem;
+  padding: 4px;
+}
+
+button {
+  padding: 8px 16px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
 </style>

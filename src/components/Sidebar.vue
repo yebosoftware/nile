@@ -30,7 +30,6 @@
     width: 200px;
     height: calc(100vh - 50px);
     background-color: #13253f;
-    padding-left: 10px; /* Add padding to prevent text from sticking to the left edge */
   }
 
   .sidebar a {
@@ -48,7 +47,6 @@
   .sidebar > ul {
     margin: 0px;
     list-style-type: none;
-    padding: 0;
   }
 
   .sidebar > ul > li {
@@ -59,5 +57,12 @@
   .sidebar i {
     margin-right: 10px; /* Space between icon and text */
     font-size: 16px; /* Adjust icon size */
+  }
+
+  /* Media query for mobile mode */
+  @media (max-width: 768px) {
+    .sidebar {
+      width: 0px;
+    }
   }
 </style>

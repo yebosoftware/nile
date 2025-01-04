@@ -2,6 +2,7 @@
 
 import { onMounted, ref } from 'vue';
 import { supabase } from '../../lib/supabase'
+import router from '@/router';
 
 interface FlowTemplate {
   is_disabled: boolean;
@@ -15,6 +16,7 @@ interface Flow {
   id: number;
   name: string;
   flow_templates: { name: string };
+  progress: number;
 }
 
 const flowTemplates = ref<FlowTemplate[]>([]);
@@ -26,9 +28,13 @@ onMounted(async () => {
 
   const { data } = await supabase
     .from('flows')
-    .select('*, flow_templates(*)')
-  
-  flows.value = data || [];
+    .select('*, nodes(*), flow_templates(*)')
+
+  console.info(data);
+  flows.value = data?.map(flow => ({
+    ...flow,
+    progress: flow.nodes.filter((node: { latest_upload_id?: number }) => node?.latest_upload_id).length / flow.nodes.length * 100 
+  })) || [];
 
   const { data: flowTemplatesData } = await supabase
     .from('flow_templates')
@@ -78,28 +84,39 @@ const getFullName = async () => {
   }
 };
 
+interface Menu {
+  is_disabled: boolean;
+  id: number;
+  title: string;
+  route: string;
+  query: { type: string; flow_template_id: number };
+}
+
+const goTo = (menu: Menu) => {
+  if (menu.is_disabled) return;
+
+  router.push({ name: menu.route, query: menu.query });
+}
 </script>
 
 <template>
   <h3>Welcome back, {{user?.full_name}}!</h3>
   <div class="main-container">
     <div class="menu-container">
-      <router-link 
-        v-for="menu in flowTemplates" :key="menu.id"
-        :to="{ name: menu.route, query: menu.query }">
-        <div class="menu-block" :class="{ is_disabled: menu.is_disabled }">
+      <!-- <router-link :to="{ name: menu.route, query: menu.query }"> -->
+        <div @click="goTo(menu)" v-for="menu in flowTemplates" :key="menu.id" class="menu-block" :class="{ is_disabled: menu.is_disabled }">
           <h3>{{ menu.title }}</h3>
           <small v-if="menu.is_disabled">Coming soon</small>
           <small v-else>Click to start</small>
         </div>
-      </router-link>
-      
+      <!-- </router-link> -->
+
     </div>
     
     <h3>Your applications</h3>
     <ul>
       <li v-for="flow in flows" :key="flow.id">
-        <router-link :to="{ name: 'flow', params: { id: flow.id } }">{{ flow.name }} - {{ flow.flow_templates.name }}</router-link>
+        <router-link :to="{ name: 'flow', params: { id: flow.id } }">{{ flow.name }} - {{ flow.flow_templates.name }} - {{ flow.progress }}%</router-link>
       </li>
     </ul>
   </div>
@@ -146,8 +163,6 @@ const getFullName = async () => {
 
   .is_disabled:hover {
     cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
   }
 
   /* Media query for mobile mode */
