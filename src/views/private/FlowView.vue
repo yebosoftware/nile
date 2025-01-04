@@ -79,6 +79,7 @@ onMounted(async () => {
     .from('nodes')
     .select('*, uploads!latest_upload_id(*)')
     .eq('flow_id', flowId)
+    .order('name', {ascending: true})
   nodes.value = await Promise.all(
     nodesData?.map(async (node) => {
       let signedUrl;
