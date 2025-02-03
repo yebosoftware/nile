@@ -31,3 +31,6 @@ coverage
 .env
 
 .vars.tf
+
+.terraform/
+.terraform.lock.hcl
