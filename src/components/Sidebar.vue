@@ -5,7 +5,7 @@
 <template>
   <div class="sidebar">
     <ul>
-      <li>
+      <!-- <li>
         <router-link :to="{ name: 'flows' }">
           <i class="fas fa-home"></i>
           Home
@@ -20,7 +20,7 @@
         <router-link :to="{ name: 'settings' }">
           <i class="fas fa-cogs"></i> Settings
         </router-link>
-      </li>
+      </li> -->
     </ul>
   </div>
 </template>
