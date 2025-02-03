@@ -34,3 +34,4 @@ coverage
 
 .terraform/
 .terraform.lock.hcl
+terraform.tfstate
