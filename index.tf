@@ -61,24 +61,24 @@ provider "digitalocean" {
   token = var.digital_ocean_access_token
 }
 
-# provider "supabase" {
-#   access_token = var.supabase_access_token
-# }
+provider "supabase" {
+  access_token = var.supabase_access_token
+}
 
 # 1. Create a Supabase project
-# resource "supabase_project" "test" {
-#   organization_id   = "yaqgmkuovhyxtvmdgdxo"
-#   name              = "foo"
-#   database_password = "as78ads98a7da1j3h1k"
-#   region            = "us-east-1"
+resource "supabase_project" "test" {
+  organization_id   = "yaqgmkuovhyxtvmdgdxo"
+  name              = "foo"
+  database_password = "as78ads98a7da1j3h1k"
+  region            = "us-east-1"
 
-#   lifecycle {
-#     ignore_changes = [
-#       database_password,
-#       instance_size,
-#     ]
-#   }
-# }
+  lifecycle {
+    ignore_changes = [
+      database_password,
+      instance_size,
+    ]
+  }
+}
 
 # 2. Create a DigitalOcean project
 resource "digitalocean_project" "playground" {
