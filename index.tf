@@ -77,7 +77,7 @@ variable "digital_ocean_project_description" {
   default     = ""
 }
 
-variable "netlify_api_token" {
+variable "netlify_access_token" {
   type = string
 }
 
@@ -92,7 +92,7 @@ variable "netlify_api_token" {
 # Providers
 
 provider "netlify" {
-  token = var.netlify_api_token
+  token = var.netlify_access_token
 }
 
 provider "digitalocean" {
