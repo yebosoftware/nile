@@ -145,6 +145,8 @@ resource "digitalocean_app" "golang-sample" {
       }
     }
   }
+  
+  project_id = digitalocean_project.playground.id  # Reference the project created earlier
 }
 
 # 1. Create a Netlify site
