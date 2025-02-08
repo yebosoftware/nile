@@ -8,10 +8,11 @@ terraform {
       source  = "supabase/supabase"
       version = "1.5.1"
     }
-    netlify = {
-      source  = "netlify/netlify"
-      version = "~> 0.2.2"
-    }
+    # Netlify does not allow to deploy sites via its provider
+    # netlify = {
+    #   source  = "netlify/netlify"
+    #   version = "~> 0.2.2"
+    # }
   }
 
   # backend "s3" {
@@ -77,9 +78,11 @@ variable "digital_ocean_project_description" {
   default     = ""
 }
 
-# variable "netlify_access_token" {
-#   type = string
-# }
+variable "netlify_access_token" {
+  description = "Netlify access token"
+  type        = string
+  default     = ""
+}
 
 # variable "netlify_site_name" {
 #   type = string
@@ -164,9 +167,9 @@ resource "digitalocean_project" "playground" {
 # then we need to use the local provider
 resource "null_resource" "netlify_deploy" {
   provisioner "local-exec" {
-    command = "netlify --help"
+    command = "netlify netlify sites:create --name ciauu --account-slug tgirotto"
     environment = {
-      # NETLIFY_AUTH_TOKEN = var.netlify_auth_token
+      NETLIFY_AUTH_TOKEN = var.netlify_access_token
     }
   }
 }
