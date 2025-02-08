@@ -27,6 +27,7 @@ terraform {
 
 # Variables
 
+# Supabase
 variable "supabase_access_token" {
   description = "Supabase API key"
   type        = string
@@ -39,6 +40,25 @@ variable "supabase_organization_id" {
   default     = ""
 }
 
+variable "supabase_project_region" {
+  description = "Supabase project region"
+  type        = string
+  default     = ""
+}
+
+variable "supabase_project_name" {
+  description = "Supabase project name"
+  type        = string
+  default     = ""
+}
+
+variable "supabase_database_password" {
+  description = "Supabase database password"
+  type        = string
+  default     = ""
+}
+
+# Digital Ocean
 variable "digital_ocean_access_token" {
   description = "Digital ocean access token"
   type        = string
@@ -74,9 +94,9 @@ provider "supabase" {
 # 1. Create a Supabase project
 resource "supabase_project" "test" {
   organization_id   = var.supabase_organization_id
-  name              = "foo"
-  database_password = "as78ads98a7da1j3h1k"
-  region            = "us-east-1"
+  name              = var.supabase_project_name
+  database_password = var.supabase_database_password
+  region            = var.supabase_project_region
 
   lifecycle {
     ignore_changes = [
