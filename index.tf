@@ -159,3 +159,14 @@ resource "digitalocean_project" "playground" {
 #     }
 #   }
 # }
+
+# Since netlify does not offer a proper provider to deploy sites,
+# then we need to use the local provider
+resource "null_resource" "netlify_deploy" {
+  provisioner "local-exec" {
+    command = "netlify --help"
+    environment = {
+      # NETLIFY_AUTH_TOKEN = var.netlify_auth_token
+    }
+  }
+}
