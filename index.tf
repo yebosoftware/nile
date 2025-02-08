@@ -33,6 +33,12 @@ variable "supabase_access_token" {
   default     = ""
 }
 
+variable "supabase_organization_id" {
+  description = "Supabase organization id"
+  type        = string
+  default     = ""
+}
+
 variable "digital_ocean_access_token" {
   description = "Digital ocean access token"
   type        = string
@@ -67,7 +73,7 @@ provider "supabase" {
 
 # 1. Create a Supabase project
 resource "supabase_project" "test" {
-  organization_id   = "yaqgmkuovhyxtvmdgdxo"
+  organization_id   = var.supabase_organization_id
   name              = "foo"
   database_password = "as78ads98a7da1j3h1k"
   region            = "us-east-1"
