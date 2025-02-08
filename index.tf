@@ -27,11 +27,11 @@ terraform {
 
 # Variables
 
-# variable "supabase_access_token" {
-#   description = "Supabase API key"
-#   type        = string
-#   default     = ""
-# }
+variable "supabase_access_token" {
+  description = "Supabase API key"
+  type        = string
+  default     = ""
+}
 
 variable "digital_ocean_access_token" {
   description = "Digital ocean access token"
