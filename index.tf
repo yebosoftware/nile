@@ -167,7 +167,7 @@ resource "digitalocean_project" "playground" {
 # then we need to use the local provider
 resource "null_resource" "netlify_deploy" {
   provisioner "local-exec" {
-    command = "netlify netlify sites:create --name ciauu --account-slug tgirotto"
+    command = "netlify sites:create --name ciauu --account-slug tgirotto"
     environment = {
       NETLIFY_AUTH_TOKEN = var.netlify_access_token
     }
