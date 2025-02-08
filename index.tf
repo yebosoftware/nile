@@ -129,40 +129,25 @@ resource "digitalocean_project" "playground" {
   environment = "Development"
 }
 
+resource "digitalocean_app" "golang-sample" {
+  spec {
+    name   = "golang-sample"
+    region = "ams"
+
+    service {
+      name               = "go-service"
+      instance_count     = 1
+      instance_size_slug = "apps-s-1vcpu-1gb"
+
+      git {
+        repo_clone_url = "https://github.com/digitalocean/sample-golang.git"
+        branch         = "main"
+      }
+    }
+  }
+}
+
 # 1. Create a Netlify site
-# resource "null_resource" "deploy_vue" {
-#   provisioner "local-exec" {
-#     command = <<EOT
-#       echo "Deploying Vue.js app to Netlify..."
-#     EOT
-#   }
-# }
-
-# # 3. Deploy a DigitalOcean App Platform application
-# resource "digitalocean_app" "my_app" {
-#   spec {
-#     name   = "supabase-app"
-#     region = "nyc"
-
-#     service {
-#       name       = "backend"
-#       instance_count = 1
-#       instance_size_slug = "basic-xxs"
-#       env {
-#         key   = "DATABASE_URL"
-#         value = supabase_project.my_supabase.db_url
-#         scope = "RUN_AND_BUILD_TIME"
-#       }
-
-#       github {
-#         repo      = "your-github-user/your-app-repo"
-#         branch    = "main"
-#         deploy_on_push = true
-#       }
-#     }
-#   }
-# }
-
 # Since netlify does not offer a proper provider to deploy sites,
 # then we need to use the local provider
 resource "null_resource" "netlify_deploy" {
