@@ -65,6 +65,18 @@ variable "digital_ocean_access_token" {
   default     = ""
 }
 
+variable "digital_ocean_project_name" {
+  description = "Digital ocean project name"
+  type        = string
+  default     = ""
+}
+
+variable "digital_ocean_project_description" {
+  description = "Digital ocean project description"
+  type        = string
+  default     = ""
+}
+
 # variable "netlify_api_token" {
 #   type = string
 # }
@@ -108,8 +120,8 @@ resource "supabase_project" "test" {
 
 # 2. Create a DigitalOcean project
 resource "digitalocean_project" "playground" {
-  name        = "playground"
-  description = "A project to represent development resources."
+  name        = var.digital_ocean_project_name
+  description = var.digital_ocean_project_description
   purpose     = "Web Application"
   environment = "Development"
 }
