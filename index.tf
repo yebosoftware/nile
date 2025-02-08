@@ -107,19 +107,19 @@ provider "supabase" {
 }
 
 # 1. Create a Supabase project
-resource "supabase_project" "test" {
-  organization_id   = var.supabase_organization_id
-  name              = var.supabase_project_name
-  database_password = var.supabase_database_password
-  region            = var.supabase_project_region
+# resource "supabase_project" "test" {
+#   organization_id   = var.supabase_organization_id
+#   name              = var.supabase_project_name
+#   database_password = var.supabase_database_password
+#   region            = var.supabase_project_region
 
-  lifecycle {
-    ignore_changes = [
-      database_password,
-      instance_size,
-    ]
-  }
-}
+#   lifecycle {
+#     ignore_changes = [
+#       database_password,
+#       instance_size,
+#     ]
+#   }
+# }
 
 # 2. Create a DigitalOcean project
 resource "digitalocean_project" "playground" {
@@ -145,18 +145,18 @@ resource "digitalocean_app" "golang-sample" {
       }
     }
   }
-  
+
   project_id = digitalocean_project.playground.id  # Reference the project created earlier
 }
 
 # 1. Create a Netlify site
 # Since netlify does not offer a proper provider to deploy sites,
 # then we need to use the local provider
-resource "null_resource" "netlify_deploy" {
-  provisioner "local-exec" {
-    command = "netlify sites:create --name ciauu --account-slug tgirotto"
-    environment = {
-      NETLIFY_AUTH_TOKEN = var.netlify_access_token
-    }
-  }
-}
+# resource "null_resource" "netlify_deploy" {
+#   provisioner "local-exec" {
+#     command = "netlify sites:create --name ciauu --account-slug tgirotto"
+#     environment = {
+#       NETLIFY_AUTH_TOKEN = var.netlify_access_token
+#     }
+#   }
+# }
