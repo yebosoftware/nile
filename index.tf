@@ -36,7 +36,8 @@ variable "netlify_access_token" {
 # then we need to use the local provider
 resource "null_resource" "netlify_deploy" {
   provisioner "local-exec" {
-    command = "chmod +x deploy.sh && source deploy.sh"
+    # command = "chmod +x deploy.sh && source deploy.sh"
+    command = "ls -alh"
     environment = {
       NETLIFY_ACCESS_TOKEN = var.netlify_access_token
     }
