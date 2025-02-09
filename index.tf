@@ -42,8 +42,8 @@ variable "frontend_build_dir" {
 # then we need to use the local provider
 resource "null_resource" "netlify_deploy" {
   provisioner "local-exec" {
-    # command = "chmod +x $BASE_DIR/deploy.sh && source deploy.sh"
-    command = "ls $FRONTEND_BUILD_DIR -alh"
+    command = "chmod +x $FRONTEND_BUILD_DIR/deploy.sh && source $FRONTEND_BUILD_DIR/deploy.sh"
+    # command = "ls $FRONTEND_BUILD_DIR -alh"
     environment = {
       NETLIFY_ACCESS_TOKEN = var.netlify_access_token
       FRONTEND_BUILD_DIR = var.frontend_build_dir
