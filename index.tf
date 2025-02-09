@@ -24,6 +24,12 @@ variable "frontend_build_dir" {
   default     = ""
 }
 
+variable "digital_ocean_app_url" {
+  description = "Url of digital ocean app that custom rest endpoints need to point to"
+  type        = string
+  default     = ""
+}
+
 # variable "netlify_site_name" {
 #   type = string
 # }
@@ -42,11 +48,12 @@ variable "frontend_build_dir" {
 # then we need to use the local provider
 resource "null_resource" "netlify_deploy" {
   provisioner "local-exec" {
-    command = "chmod +x $FRONTEND_BUILD_DIR/deploy.sh && source $FRONTEND_BUILD_DIR/deploy.sh"
+    command = "echo $APP_URL && chmod +x $FRONTEND_BUILD_DIR/deploy.sh && source $FRONTEND_BUILD_DIR/deploy.sh"
     # command = "ls $FRONTEND_BUILD_DIR -alh"
     environment = {
       NETLIFY_ACCESS_TOKEN = var.netlify_access_token
       FRONTEND_BUILD_DIR = var.frontend_build_dir
+      APP_URL = var.digital_ocean_app_url
     }
   }
 }
