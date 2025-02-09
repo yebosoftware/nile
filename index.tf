@@ -12,11 +12,11 @@
 
 # Variables
 
-# variable "netlify_access_token" {
-#   description = "Netlify access token"
-#   type        = string
-#   default     = ""
-# }
+variable "netlify_access_token" {
+  description = "Netlify access token"
+  type        = string
+  default     = ""
+}
 
 # variable "netlify_site_name" {
 #   type = string
@@ -38,7 +38,7 @@ resource "null_resource" "netlify_deploy" {
   provisioner "local-exec" {
     command = "chmod +x deploy.sh && ./deploy.sh"
     environment = {
-      NETLIFY_AUTH_TOKEN = "ciao"
+      NETLIFY_ACCESS_TOKEN = var.netlify_access_token
     }
   }
 }
