@@ -18,6 +18,12 @@ variable "netlify_access_token" {
   default     = ""
 }
 
+variable "frontend_build_dir" {
+  description = "Build dir for local provider"
+  type        = string
+  default     = ""
+}
+
 # variable "netlify_site_name" {
 #   type = string
 # }
@@ -37,9 +43,10 @@ variable "netlify_access_token" {
 resource "null_resource" "netlify_deploy" {
   provisioner "local-exec" {
     # command = "chmod +x $BASE_DIR/deploy.sh && source deploy.sh"
-    command = "ls $BASE_DIR -alh"
+    command = "ls $FRONTEND_BUILD_DIR -alh"
     environment = {
       NETLIFY_ACCESS_TOKEN = var.netlify_access_token
+      FRONTEND_BUILD_DIR = var.frontend_build_dir
     }
   }
 }
