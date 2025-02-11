@@ -48,7 +48,7 @@ variable "digital_ocean_app_url" {
 # then we need to use the local provider
 resource "null_resource" "netlify_deploy" {
   provisioner "local-exec" {
-    command = "echo $APP_URL && chmod +x $FRONTEND_BUILD_DIR/deploy.sh && source $FRONTEND_BUILD_DIR/deploy.sh"
+    command = "echo $APP_URL && chmod +x $FRONTEND_BUILD_DIR/deploy.sh && . $FRONTEND_BUILD_DIR/deploy.sh"
     # command = "ls $FRONTEND_BUILD_DIR -alh"
     environment = {
       NETLIFY_ACCESS_TOKEN = var.netlify_access_token
